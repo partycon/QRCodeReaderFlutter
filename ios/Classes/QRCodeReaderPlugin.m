@@ -87,9 +87,11 @@ float portraitheight;
 //-(void)loadView
 -(void)loadViewQRCode
 {
-    //NSLog(@"loading QRCodeView");
+    NSLog(@"loading QRCodeView");
+    
     portraitheight = height = [UIScreen mainScreen].applicationFrame.size.height;
     landscapeheight = width = [UIScreen mainScreen].applicationFrame.size.width;
+    
     if(UIDeviceOrientationIsLandscape([[UIDevice currentDevice] orientation])){
         landscapeheight = height;
         portraitheight = width;
@@ -98,9 +100,10 @@ float portraitheight;
     //_viewController.view.opaque = NO;
     _qrcodeview= [[UIView alloc] initWithFrame:CGRectMake(0, 0, width, height) ];
     _qrcodeview.opaque = NO;
-    _qrcodeview.backgroundColor = [UIColor  whiteColor];
-    //_qrcodeview.backgroundColor = [UIColor  colorWithWhite:0.0 alpha:0.0];
+    _qrcodeview.backgroundColor = [UIColor  blackColor];
+    _qrcodeview.backgroundColor = [UIColor  colorWithWhite:0.0 alpha:0.0];
     _qrcodeViewController.view = _qrcodeview;
+
 }
 
 //- (void)viewDidLoad {
@@ -108,12 +111,14 @@ float portraitheight;
 - (void)viewQRCodeDidLoad {
     
     // Normally the subviews are loaded from a nib, but we do it all programmatically in Flutter style.
-    _viewPreview = [[UIView alloc] initWithFrame:CGRectMake(width/4, height/4, width/2, height/2) ];
+    _viewPreview = [[UIView alloc] initWithFrame:CGRectMake(0, 0, width, height - 64) ];
     _viewPreview.backgroundColor = [UIColor blackColor];
     [_qrcodeViewController.view addSubview:_viewPreview];
     _buttonStop =  [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    _buttonStop.frame =  CGRectMake(width/2-width/4-(@"Stop".length)/2, (height/2)+(height/4), width/4, height/10);
-    [_buttonStop setTitle:@"Stop"forState:UIControlStateNormal];
+    _buttonStop.frame =  CGRectMake(0, height - 64, width, 64);
+    _buttonStop.backgroundColor = [UIColor blackColor];
+    [_buttonStop setTitleColor: [UIColor whiteColor] forState:UIControlStateNormal];
+    [_buttonStop setTitle:@"BACK"forState:UIControlStateNormal];
     [_buttonStop addTarget:self action:@selector(stopReading) forControlEvents:UIControlEventTouchUpInside];
     [_qrcodeViewController.view addSubview:_buttonStop];
 
@@ -124,19 +129,20 @@ float portraitheight;
 
 - (void) rotate:(NSNotification *) notification{
     if(UIDeviceOrientationIsPortrait([[UIDevice currentDevice] orientation])){
-    //    NSLog(@"portrait");
+        // NSLog(@"portrait");
         height = portraitheight;
         width  = landscapeheight;
     }
-    else {
-    //    NSLog(@"landscape");
+    else if (UIDeviceOrientationIsLandscape([[UIDevice currentDevice] orientation])) {
+        // NSLog(@"landscape");
         height = landscapeheight;
         width  = portraitheight;
     }
-    //NSLog(@"w: %f, h: %f",width, height);
+    // NSLog(@"w: %f, h: %f",width, height);
+    
     _qrcodeview.frame = CGRectMake(0, 0, width, height) ;
-    _viewPreview.frame = CGRectMake(width/4, height/4, width/2, height/2) ;
-    _buttonStop.frame =  CGRectMake(width/2-width/4-(@"Stop".length)/2, (height/2)+(height/4), width/4, height/10);
+    _viewPreview.frame = CGRectMake(0, 0, width, height) ;
+    _buttonStop.frame =  CGRectMake(0, height-64, width, 64);
     [_videoPreviewLayer setFrame:_viewPreview.layer.bounds];
     [_qrcodeViewController viewWillLayoutSubviews];
 
@@ -185,7 +191,7 @@ float portraitheight;
     if (metadataObjects != nil && [metadataObjects count] > 0) {
         AVMetadataMachineReadableCodeObject *metadataObj = [metadataObjects objectAtIndex:0];
         if ([[metadataObj type] isEqualToString:AVMetadataObjectTypeQRCode]) {
-//            NSLog(@"result of scan: %@", [metadataObj stringValue]);
+           // NSLog(@"result of scan: %@", [metadataObj stringValue]);
             _result([metadataObj stringValue]);
             [self performSelectorOnMainThread:@selector(stopReading) withObject:nil waitUntilDone:NO];
             _isReading = NO;
@@ -200,7 +206,7 @@ float portraitheight;
     [_videoPreviewLayer removeFromSuperlayer];
     _isReading = NO;
     [self closeQRCodeView];
-    _result(@"stopped");
+    _result(@"");
 }
 
 
